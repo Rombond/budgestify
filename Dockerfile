@@ -16,6 +16,7 @@ FROM alpine:latest
 
 WORKDIR /root/
 
+COPY .env ./
 COPY --from=builder /app/budgestify .
 
 EXPOSE ${API_PORT}
