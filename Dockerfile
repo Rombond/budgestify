@@ -4,12 +4,11 @@ FROM golang:latest AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY . .
 RUN go mod download
 
-COPY *.go ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o ./budgestify
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./budgestify ./main.go
 
 # Étape 2 : Image légère pour l'exécution
 FROM alpine:latest
