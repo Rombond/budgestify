@@ -1,46 +1,23 @@
 package main
 
 import (
-	"database/sql"
-	"log"
-	"net/http"
+	"log/slog"
 	"os"
 
-	"github.com/gin-gonic/gin"
-	"github.com/go-sql-driver/mysql"
+	router "github.com/Rombond/budgestify/internal/router"
+	db_sql "github.com/Rombond/budgestify/internal/sql"
+
 	"github.com/joho/godotenv"
 )
-
-var db *sql.DB
 
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		slog.Error("Error while loading .env file: " + err.Error())
+		os.Exit(1)
 	}
 
-	cfg := mysql.Config{
-		User:   "root",
-		Passwd: os.Getenv("DB_PASSWORD"),
-		Net:    "tcp",
-		Addr:   "mysql_db:" + os.Getenv("DB_PORT"),
-		DBName: os.Getenv("DB_NAME"),
-	}
+	db := db_sql.ConnectDatabase()
 
-	db, err = sql.Open("mysql", cfg.FormatDSN())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	router := gin.Default()
-	router.GET("/", func(ctx *gin.Context) {
-		state := true
-		pingErr := db.Ping()
-		if pingErr != nil {
-			log.Fatal(pingErr)
-			state = false
-		}
-		ctx.JSON(http.StatusOK, gin.H{"status": state})
-	})
-	router.Run(":" + os.Getenv("API_PORT"))
+	router.InitRouter(db)
 }
