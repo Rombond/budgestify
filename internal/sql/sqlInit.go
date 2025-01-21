@@ -1,4 +1,4 @@
-package sqlInit
+package db_sql
 
 import (
 	"database/sql"
