@@ -15,7 +15,7 @@ type Pair struct {
 }
 
 var Tables = []Pair{
-	{"User", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, hash BINARY(64) NOT NULL"},
+	{"User", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, login VARCHAR(255) NOT NULL, hash BINARY(64) NOT NULL"},
 	{"AccountHouse", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, amount int NOT NULL"},
 	{"House", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, account INT, FOREIGN KEY (account) REFERENCES AccountHouse(id)"},
 	{"Category", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, icons VARCHAR(255), parent INT, house INT, FOREIGN KEY (parent) REFERENCES Category(id), FOREIGN KEY (house) REFERENCES House(id)"},
@@ -24,6 +24,17 @@ var Tables = []Pair{
 	{"Transaction", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, amount int NOT NULL, payer INT NOT NULL, category INT, FOREIGN KEY (payer) REFERENCES House_User(id), FOREIGN KEY (category) REFERENCES Category(id)"},
 	{"Participant", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), house_user INT NOT NULL, transaction int NOT NULL,FOREIGN KEY (house_user) REFERENCES House_User(id), FOREIGN KEY (transaction) REFERENCES Transaction(id)"},
 }
+
+const (
+	User         = 0
+	AccountHouse = 1
+	House        = 2
+	Category     = 3
+	House_User   = 4
+	Account      = 5
+	Transaction  = 6
+	Participant  = 7
+)
 
 func ConnectDatabase() *sql.DB {
 	cfg := mysql.Config{
