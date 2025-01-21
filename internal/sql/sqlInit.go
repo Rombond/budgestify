@@ -27,14 +27,9 @@ func ConnectDatabase() *sql.DB {
 }
 
 func InitDatabase(db *sql.DB) {
-	tableName := "Category"
+	tableName := "User"
 	if isTableMissing(db, tableName) {
-		createTable(db, tableName, "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, icons VARCHAR(255), parent INT, FOREIGN KEY (parent) REFERENCES Category(id)")
-	}
-
-	tableName = "User"
-	if isTableMissing(db, tableName) {
-		createTable(db, tableName, "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL")
+		createTable(db, tableName, "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, hash BINARY(64) NOT NULL")
 	}
 
 	tableName = "AccountHouse"
@@ -45,6 +40,11 @@ func InitDatabase(db *sql.DB) {
 	tableName = "House"
 	if isTableMissing(db, tableName) {
 		createTable(db, tableName, "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, account INT, FOREIGN KEY (account) REFERENCES AccountHouse(id)")
+	}
+
+	tableName = "Category"
+	if isTableMissing(db, tableName) {
+		createTable(db, tableName, "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, icons VARCHAR(255), parent INT, house INT, FOREIGN KEY (parent) REFERENCES Category(id), FOREIGN KEY (house) REFERENCES House(id)")
 	}
 
 	tableName = "House_User"
