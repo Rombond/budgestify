@@ -1,4 +1,5 @@
 .env
 .air.toml
 pre_cmd.txt
+post_cmd.txt
 tmp
