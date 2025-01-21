@@ -18,6 +18,7 @@ func main() {
 	}
 
 	db := db_sql.ConnectDatabase()
+	db_sql.InitDatabase(db)
 
 	router.InitRouter(db)
 }
