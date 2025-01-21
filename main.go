@@ -18,7 +18,10 @@ func main() {
 	}
 
 	db := db_sql.ConnectDatabase()
-	db_sql.InitDatabase(db)
+	state := db_sql.GetStateSetup(db, "")
+	if !state.IsDbInitialized {
+		db_sql.InitDatabase(db)
+	}
 
 	router.InitRouter(db)
 }
