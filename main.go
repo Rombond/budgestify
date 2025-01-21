@@ -5,7 +5,7 @@ import (
 	"os"
 
 	router "github.com/Rombond/budgestify/internal/router"
-	db_sql "github.com/Rombond/budgestify/internal/sql"
+	sqlInit "github.com/Rombond/budgestify/internal/sql"
 
 	"github.com/joho/godotenv"
 )
@@ -17,8 +17,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	db := db_sql.ConnectDatabase()
-	db_sql.InitDatabase(db)
+	db := sqlInit.ConnectDatabase()
+	sqlInit.InitDatabase(db)
 
 	router.InitRouter(db)
 }
