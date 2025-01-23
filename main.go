@@ -18,7 +18,8 @@ func main() {
 	}
 
 	db := db_sql.ConnectDatabase()
-	state := db_sql.GetStateSetup(db, "")
+	db_sql.UpdateStateSetup(db, "")
+	state := db_sql.GetStateSetup()
 	if !state.IsDbInitialized {
 		db_sql.InitDatabase(db)
 	}

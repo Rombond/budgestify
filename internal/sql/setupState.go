@@ -4,39 +4,56 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
-
-	"github.com/Rombond/budgestify/internal/sql/tables/house"
-	"github.com/Rombond/budgestify/internal/sql/tables/user"
 )
 
 type StateSetup struct {
-	IsDbInitialized   bool
-	IsUserCreated     bool
-	IsHouseCreated    bool
-	IsCategoryCreated bool
+	IsDbInitialized   bool `json:"isDatabaseInitialized"`
+	IsUserCreated     bool `json:"isUserCreated"`
+	IsHouseCreated    bool `json:"isHouseCreated"`
+	IsCategoryCreated bool `json:"isCategoryCreated"`
 }
 
 var state StateSetup
 
-func GetStateSetup(db *sql.DB, login string) StateSetup {
-	state.IsDbInitialized = setDbInitialized(db)
-	state.IsUserCreated = setUserCreated(db)
-	state.IsHouseCreated = false
-	state.IsCategoryCreated = false
+func GetStateSetup() *StateSetup {
+	return &state
+}
+
+func GetSetupDone() bool {
+	return state.IsDbInitialized || state.IsUserCreated || state.IsHouseCreated || state.IsCategoryCreated
+}
+
+func UpdateStateSetup(db *sql.DB, login string) {
+	if !state.IsDbInitialized {
+		state.IsDbInitialized = setDbInitialized(db)
+		if !state.IsDbInitialized {
+			return
+		}
+	}
+	if !state.IsUserCreated {
+		state.IsUserCreated = setUserCreated(db)
+		if !state.IsUserCreated {
+			return
+		}
+	}
 	if login == "" {
-		return state
+		return
 	}
-	userID := user.GetUserID(login)
-	if userID == -1 {
-		return state
+	userID, err := GetUserID(db, login)
+	if !state.IsHouseCreated {
+		if userID == -1 || err != nil {
+			return
+		}
+		state.IsHouseCreated = setHouseCreated(db, userID)
+		if !state.IsHouseCreated {
+			return
+		}
 	}
-	state.IsHouseCreated = setHouseCreated(db, userID)
-	houseID := house.GetHouseID(userID)
-	if houseID == -1 {
-		return state
+	houseID, err := GetHouseIDFromUser(db, userID)
+	if err != nil || houseID == -1 {
+		return
 	}
 	state.IsCategoryCreated = setCategoryCreated(db, houseID)
-	return state
 }
 
 func setDbInitialized(db *sql.DB) bool {
@@ -52,7 +69,7 @@ func setDbInitialized(db *sql.DB) bool {
 
 func setUserCreated(db *sql.DB) bool {
 	isCreated := true
-	query := fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s`;", Tables[User].Key)
+	query := fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s`;", Tables[UserIdx].Key)
 	err := db.QueryRow(query).Scan(&isCreated)
 	if err != nil {
 		slog.Error("[setUserCreated] Error querying number of users: " + err.Error())
@@ -64,14 +81,14 @@ func setUserCreated(db *sql.DB) bool {
 func setHouseCreated(db *sql.DB, userID int) bool {
 	isCreated := true
 	isThereHouses := true
-	query := fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s`;", Tables[House].Key)
+	query := fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s`;", Tables[HouseIdx].Key)
 	err := db.QueryRow(query).Scan(&isThereHouses)
 	if err != nil {
 		slog.Error("[setHouseCreated] Error querying number of houses: " + err.Error())
 		isCreated = false
 	}
 	if isThereHouses {
-		query = fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s` WHERE user = %d;", Tables[House_User].Key, userID)
+		query = fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s` WHERE user = %d;", Tables[House_UserIdx].Key, userID)
 		err = db.QueryRow(query).Scan(&isCreated)
 		if err != nil {
 			slog.Error("[setHouseCreated] Error querying user's house: " + err.Error())
@@ -84,14 +101,14 @@ func setHouseCreated(db *sql.DB, userID int) bool {
 func setCategoryCreated(db *sql.DB, houseID int) bool {
 	isCreated := true
 	isThereCategories := true
-	query := fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s`;", Tables[Category].Key)
+	query := fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s`;", Tables[CategoryIdx].Key)
 	err := db.QueryRow(query).Scan(&isThereCategories)
 	if err != nil {
 		slog.Error("[setCategoryCreated] Error querying number of categories: " + err.Error())
 		isCreated = false
 	}
 	if isThereCategories {
-		query = fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s` WHERE user = %d;", Tables[Category].Key, houseID)
+		query = fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s` WHERE user = %d;", Tables[CategoryIdx].Key, houseID)
 		err = db.QueryRow(query).Scan(&isCreated)
 		if err != nil {
 			slog.Error("[setCategoryCreated] Error querying house's categories: " + err.Error())

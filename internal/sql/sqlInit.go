@@ -26,14 +26,14 @@ var Tables = []Pair{
 }
 
 const (
-	User         = 0
-	AccountHouse = 1
-	House        = 2
-	Category     = 3
-	House_User   = 4
-	Account      = 5
-	Transaction  = 6
-	Participant  = 7
+	UserIdx         = 0
+	AccountHouseIdx = 1
+	HouseIdx        = 2
+	CategoryIdx     = 3
+	House_UserIdx   = 4
+	AccountIdx      = 5
+	TransactionIdx  = 6
+	ParticipantIdx  = 7
 )
 
 func ConnectDatabase() *sql.DB {
