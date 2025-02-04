@@ -106,3 +106,15 @@ func LeaveHouse(db *sql.DB, houseID int, userID int) (bool, error) {
 	}
 	return true, nil
 }
+
+func IsUserAdmin(db *sql.DB, houseID int, userID int) (bool, error) {
+	admin := false
+	query := fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s` WHERE house = ? AND admin = 1 AND user = ?;", Tables[House_UserIdx].Key)
+	err := db.QueryRow(query, houseID, userID).Scan(&admin)
+	if err != nil {
+		slog.Error("[IsUserAdmin] Error querying admin: " + err.Error())
+		admin = false
+		return admin, err
+	}
+	return admin, nil
+}

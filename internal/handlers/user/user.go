@@ -183,3 +183,5 @@ func ChangeUser(db *sql.DB) func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, user)
 	}
 }
+
+//TODO: delete user

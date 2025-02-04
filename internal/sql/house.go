@@ -37,7 +37,7 @@ func CreateHouse(db *sql.DB, name string) (int, error) {
 }
 
 func ChangeHouseName(db *sql.DB, houseID int, newName string) (bool, error) {
-	query := fmt.Sprintf("UPDATE %s SET `name` = ? WHERE id = ?", Tables[houseID].Key)
+	query := fmt.Sprintf("UPDATE %s SET `name` = ? WHERE id = ?", Tables[HouseIdx].Key)
 	_, err := db.Exec(query, newName, houseID)
 	if err != nil {
 		slog.Error("[ChangeHouseName] Error while updating house: " + err.Error())
@@ -47,10 +47,20 @@ func ChangeHouseName(db *sql.DB, houseID int, newName string) (bool, error) {
 }
 
 func DeleteHouse(db *sql.DB, houseID int) (bool, error) {
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", Tables[houseID].Key)
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", Tables[HouseIdx].Key)
 	_, err := db.Exec(query, houseID)
 	if err != nil {
 		slog.Error("[DeleteHouse] Error while updating house: " + err.Error())
+		return false, err
+	}
+	return true, nil
+}
+
+func AddAccount(db *sql.DB, houseID int, accountHouseID int) (bool, error) {
+	query := fmt.Sprintf("UPDATE %s SET `account` = ? WHERE id = ?", Tables[HouseIdx].Key)
+	_, err := db.Exec(query, accountHouseID, houseID)
+	if err != nil {
+		slog.Error("[AddAccount] Error while updating house: " + err.Error())
 		return false, err
 	}
 	return true, nil
