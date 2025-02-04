@@ -15,19 +15,19 @@ import (
 
 func GetUser(db *sql.DB) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		valid, err := token.IsTokenValid(ctx.GetHeader("Authorization"))
+		id, err := strconv.Atoi(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+
+		valid, err := token.IsTokenValid(ctx.GetHeader("Authorization"), id)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return
 		}
 		if !valid {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"reason": "Authorization is not valid"})
-			return
-		}
-
-		id, err := strconv.Atoi(ctx.Param("id"))
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return
 		}
 
@@ -61,7 +61,13 @@ func CreateUser(db *sql.DB) func(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return
 		}
-		ctx.JSON(http.StatusCreated, gin.H{"userID": id})
+
+		tokenStr, err := token.GenerateToken(id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"token": tokenStr})
 	}
 }
 
@@ -107,7 +113,7 @@ func LoginUser(db *sql.DB) func(ctx *gin.Context) {
 			return
 		}
 
-		tokenStr, err := token.GenerateToken(params.Login)
+		tokenStr, err := token.GenerateToken(id)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return
@@ -118,7 +124,27 @@ func LoginUser(db *sql.DB) func(ctx *gin.Context) {
 
 func ChangeUser(db *sql.DB) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		valid, err := token.IsTokenValid(ctx.GetHeader("Authorization"))
+		var params user.UserForm
+		err := ctx.ShouldBindJSON(&params)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+
+		if params.Login == "" && params.Id == 0 {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No Login provided"})
+			return
+		}
+
+		if params.Id == 0 {
+			params.Id, err = db_sql.GetUserID(db, params.Login)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+				return
+			}
+		}
+
+		valid, err := token.IsTokenValid(ctx.GetHeader("Authorization"), params.Id)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return
@@ -128,33 +154,13 @@ func ChangeUser(db *sql.DB) func(ctx *gin.Context) {
 			return
 		}
 
-		var params user.UserForm
-		err = ctx.ShouldBindJSON(&params)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
-			return
-		}
-
-		if params.Login == "" {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No Login provided"})
-			return
-		}
-		id := params.Id
-		if id == 0 {
-			id, err = db_sql.GetUserID(db, params.Login)
-			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
-				return
-			}
-		}
-
 		if params.Hash != "" {
 			hash, err := password.ParamToByte(params.Hash)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 				return
 			}
-			_, err = db_sql.ChangeUserHash(db, id, hash)
+			_, err = db_sql.ChangeUserHash(db, params.Id, hash)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 				return
@@ -162,14 +168,14 @@ func ChangeUser(db *sql.DB) func(ctx *gin.Context) {
 		}
 
 		if params.Name != "" {
-			_, err = db_sql.ChangeUserName(db, id, params.Name)
+			_, err = db_sql.ChangeUserName(db, params.Id, params.Name)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 				return
 			}
 		}
 
-		user, err := db_sql.GetUser(db, id)
+		user, err := db_sql.GetUser(db, params.Id)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return

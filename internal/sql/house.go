@@ -13,33 +13,27 @@ func GetHouse(db *sql.DB, id int) (house.House, error) {
 	query := fmt.Sprintf("SELECT * FROM `%s` WHERE id = ?;", Tables[HouseIdx].Key)
 	err := db.QueryRow(query, id).Scan(&house.Id, &house.Name, &house.AccountId)
 	if err != nil {
-		slog.Error("[GetUserID] Error querying user id: " + err.Error())
+		slog.Error("[GetHouse] Error querying house: " + err.Error())
 	}
 	return house, err
 }
 
-func GetHouseIDFromUser(db *sql.DB, userID int) (int, error) {
-	id := -1
-	query := fmt.Sprintf("SELECT house FROM `%s` WHERE user = ?;", Tables[House_UserIdx].Key)
-	err := db.QueryRow(query, userID).Scan(&id)
-	if err != nil {
-		slog.Error("[GetHouseIDFromUser] Error querying house id from user: " + err.Error())
-		id = -1
-		return id, err
-	}
-	return id, nil
-}
-
 func CreateHouse(db *sql.DB, name string) (int, error) {
-	id := -1
+	var id int64 = -1
 	query := fmt.Sprintf("INSERT INTO `%s` (`name`) VALUES (?);", Tables[HouseIdx].Key)
-	err := db.QueryRow(query, name).Scan(&id)
+	results, err := db.Exec(query, name)
 	if err != nil {
 		slog.Error("[CreateHouse] Inserting new house: " + err.Error())
 		id = -1
-		return id, err
+		return int(id), err
 	}
-	return id, nil
+	id, err = results.LastInsertId()
+	if err != nil {
+		slog.Error("[CreateHouse] Error while getting lastInsertId: " + err.Error())
+		id = -1
+		return int(id), err
+	}
+	return int(id), nil
 }
 
 func ChangeHouseName(db *sql.DB, houseID int, newName string) (bool, error) {
@@ -47,6 +41,16 @@ func ChangeHouseName(db *sql.DB, houseID int, newName string) (bool, error) {
 	_, err := db.Exec(query, newName, houseID)
 	if err != nil {
 		slog.Error("[ChangeHouseName] Error while updating house: " + err.Error())
+		return false, err
+	}
+	return true, nil
+}
+
+func DeleteHouse(db *sql.DB, houseID int) (bool, error) {
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", Tables[houseID].Key)
+	_, err := db.Exec(query, houseID)
+	if err != nil {
+		slog.Error("[DeleteHouse] Error while updating house: " + err.Error())
 		return false, err
 	}
 	return true, nil

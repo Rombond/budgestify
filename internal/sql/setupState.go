@@ -49,11 +49,11 @@ func UpdateStateSetup(db *sql.DB, login string) {
 			return
 		}
 	}
-	houseID, err := GetHouseIDFromUser(db, userID)
-	if err != nil || houseID == -1 {
+	houseIDs, err := GetHouseIDFromUser(db, userID)
+	if err != nil || len(houseIDs) > 1 {
 		return
 	}
-	state.IsCategoryCreated = setCategoryCreated(db, houseID)
+	state.IsCategoryCreated = setCategoryCreated(db, houseIDs[0])
 }
 
 func setDbInitialized(db *sql.DB) bool {

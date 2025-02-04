@@ -33,7 +33,7 @@ func GetUserID(db *sql.DB, login string) (int, error) {
 
 func CreateUser(db *sql.DB, name string, login string, hash []byte) (int, error) {
 	var id int64 = -1
-	idLogin, err := GetUserID(db, login)
+	idLogin, _ := GetUserID(db, login)
 	if idLogin != -1 {
 		slog.Error("[CreateUser] Error user already exist")
 		return int(id), errors.New("Login already taken")
@@ -69,6 +69,16 @@ func ChangeUserName(db *sql.DB, userID int, name string) (bool, error) {
 	_, err := db.Exec(query, name, userID)
 	if err != nil {
 		slog.Error("[ChangeUserName] Error while updating user: " + err.Error())
+		return false, err
+	}
+	return true, nil
+}
+
+func DeleteUser(db *sql.DB, userID int) (bool, error) {
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", Tables[UserIdx].Key)
+	_, err := db.Exec(query, userID)
+	if err != nil {
+		slog.Error("[DeleteUser] Error while updating house: " + err.Error())
 		return false, err
 	}
 	return true, nil

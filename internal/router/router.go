@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"os"
 
+	houseHandlers "github.com/Rombond/budgestify/internal/handlers/house"
 	status "github.com/Rombond/budgestify/internal/handlers/status"
 	userHandlers "github.com/Rombond/budgestify/internal/handlers/user"
 
@@ -28,6 +29,14 @@ func InitRouter(db *sql.DB) {
 
 			userGroup.POST("/register", userHandlers.CreateUser(db))
 			userGroup.POST("/edit", userHandlers.ChangeUser(db))
+		}
+
+		houseGroup := userGroup.Group("/houses")
+		{
+			houseGroup.GET("/own", houseHandlers.GetHouse(db))
+
+			houseGroup.POST("/link", houseHandlers.CreateHouseForUser(db))
+			houseGroup.POST("/invite", houseHandlers.CreateHouseForUser(db))
 		}
 	}
 
