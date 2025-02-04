@@ -90,9 +90,26 @@ func CreateAccountForHouse(db *sql.DB) func(ctx *gin.Context) {
 			return
 		}
 
+		isAdmin, err := db_sql.IsUserAdmin(db, params.HouseID, params.UserId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+		if !isAdmin {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"reason": "You are not an administrator of the house"})
+			return
+		}
+
 		id, err := db_sql.CreateAccountHouse(db, params.Name, params.Amount)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+
+		_, err = db_sql.AddAccount(db, params.HouseID, id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			db_sql.DeleteAccountHouse(db, id)
 			return
 		}
 
@@ -129,6 +146,22 @@ func UpdateAccountForHouse(db *sql.DB) func(ctx *gin.Context) {
 			return
 		}
 
+		houseID, err := db_sql.GetHouseIDFromAccount(db, params.Id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+
+		isAdmin, err := db_sql.IsUserAdmin(db, houseID, params.UserId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+		if !isAdmin {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"reason": "You are not an administrator of the house"})
+			return
+		}
+
 		if params.Amount != 0 {
 			_, err = db_sql.ChangeAccountHouseAmount(db, params.Id, params.Amount)
 			if err != nil {
@@ -154,4 +187,4 @@ func UpdateAccountForHouse(db *sql.DB) func(ctx *gin.Context) {
 	}
 }
 
-//TODO: Delete account
+//TODO: delete accountHouse

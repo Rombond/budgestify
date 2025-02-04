@@ -65,3 +65,13 @@ func DeleteAccountHouse(db *sql.DB, accountHouseID int) (bool, error) {
 	}
 	return true, nil
 }
+
+func GetHouseIDFromAccount(db *sql.DB, accountHouseID int) (int, error) {
+	id := -1
+	query := fmt.Sprintf("SELECT id FROM `%s` WHERE account = ?;", Tables[HouseIdx].Key)
+	err := db.QueryRow(query, accountHouseID).Scan(&id)
+	if err != nil {
+		slog.Error("[GetHouseIDFromAccount] Error querying house: " + err.Error())
+	}
+	return id, err
+}
