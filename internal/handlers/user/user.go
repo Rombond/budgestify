@@ -132,7 +132,7 @@ func ChangeUser(db *sql.DB) func(ctx *gin.Context) {
 		}
 
 		if params.Login == "" && params.Id == 0 {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No Login provided"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No login or id provided"})
 			return
 		}
 

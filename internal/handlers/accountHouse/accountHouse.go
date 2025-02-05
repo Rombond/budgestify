@@ -132,7 +132,7 @@ func UpdateAccountForHouse(db *sql.DB) func(ctx *gin.Context) {
 		}
 
 		if params.Id == 0 {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No houseAccountID found"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No id found"})
 			return
 		}
 

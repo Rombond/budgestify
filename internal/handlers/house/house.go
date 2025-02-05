@@ -127,6 +127,11 @@ func ChangeHouse(db *sql.DB) func(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No userID provided"})
 		}
 
+		if params.Id == 0 {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No id provided"})
+			return
+		}
+
 		valid, err := token.IsTokenValid(ctx.GetHeader("Authorization"), params.UserId)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
@@ -134,11 +139,6 @@ func ChangeHouse(db *sql.DB) func(ctx *gin.Context) {
 		}
 		if !valid {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"reason": "Authorization is not valid"})
-			return
-		}
-
-		if params.Id == 0 {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No id provided"})
 			return
 		}
 
