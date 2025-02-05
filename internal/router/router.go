@@ -32,7 +32,7 @@ func InitRouter(db *sql.DB) {
 			userGroup.POST("/edit", userHandlers.ChangeUser(db))
 		}
 
-		houseGroup := userGroup.Group("/houses")
+		houseGroup := api.Group("/houses")
 		{
 			houseGroup.GET("/own", houseHandlers.GetHouse(db))
 
