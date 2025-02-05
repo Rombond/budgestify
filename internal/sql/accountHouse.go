@@ -60,7 +60,7 @@ func DeleteAccountHouse(db *sql.DB, accountHouseID int) (bool, error) {
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", Tables[AccountHouseIdx].Key)
 	_, err := db.Exec(query, accountHouseID)
 	if err != nil {
-		slog.Error("[DeleteAccountHouse] Error while updating accountHouse: " + err.Error())
+		slog.Error("[DeleteAccountHouse] Error while deleting accountHouse: " + err.Error())
 		return false, err
 	}
 	return true, nil

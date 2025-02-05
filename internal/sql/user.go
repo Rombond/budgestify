@@ -78,7 +78,7 @@ func DeleteUser(db *sql.DB, userID int) (bool, error) {
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", Tables[UserIdx].Key)
 	_, err := db.Exec(query, userID)
 	if err != nil {
-		slog.Error("[DeleteUser] Error while updating house: " + err.Error())
+		slog.Error("[DeleteUser] Error while deleting user: " + err.Error())
 		return false, err
 	}
 	return true, nil
