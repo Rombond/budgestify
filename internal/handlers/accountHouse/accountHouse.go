@@ -146,18 +146,12 @@ func UpdateAccountForHouse(db *sql.DB) func(ctx *gin.Context) {
 			return
 		}
 
-		houseID, err := db_sql.GetHouseIDFromAccount(db, params.Id)
+		canEdit, err := db_sql.DoesUserCanEditAccount(db, params.Id, params.UserId)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return
 		}
-
-		isAdmin, err := db_sql.IsUserAdmin(db, houseID, params.UserId)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
-			return
-		}
-		if !isAdmin {
+		if !canEdit {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"reason": "You are not an administrator of the house"})
 			return
 		}

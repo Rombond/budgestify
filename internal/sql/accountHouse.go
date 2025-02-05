@@ -75,3 +75,13 @@ func GetHouseIDFromAccount(db *sql.DB, accountHouseID int) (int, error) {
 	}
 	return id, err
 }
+
+func DoesUserCanEditAccount(db *sql.DB, accountHouseID int, userID int) (bool, error) {
+	canEdit := false
+	query := fmt.Sprintf("SELECT hu.admin FROM `%s` h JOIN `%s` ah ON h.account = ah.id JOIN `%s` hu ON hu.house = h.id WHERE ah.id = ? AND hu.user = ?;", Tables[HouseIdx].Key, Tables[AccountHouseIdx].Key, Tables[House_UserIdx].Key)
+	err := db.QueryRow(query, accountHouseID, userID).Scan(&canEdit)
+	if err != nil {
+		slog.Error("[GetHouseIDFromAccount] Error querying house: " + err.Error())
+	}
+	return canEdit, nil
+}
