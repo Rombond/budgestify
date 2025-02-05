@@ -18,6 +18,26 @@ func GetHouse(db *sql.DB, id int) (house.House, error) {
 	return house, err
 }
 
+func GetHouses(db *sql.DB, userID int) ([]house.House, error) {
+	var houses []house.House
+	var house house.House
+	query := fmt.Sprintf("SELECT h.* FROM %s h JOIN %s hu ON h.id = hu.house WHERE hu.user = ?;", Tables[HouseIdx].Key, Tables[House_UserIdx].Key)
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		slog.Error("[GetCategories] Error querying house id from user: " + err.Error())
+		return houses, err
+	}
+	house.UserId = userID
+	for rows.Next() {
+		rows.Scan(&house.Id, &house.Name, &house.AccountId)
+		houses = append(houses, house)
+	}
+	if err = rows.Err(); err != nil {
+		return houses, err
+	}
+	return houses, err
+}
+
 func CreateHouse(db *sql.DB, name string) (int, error) {
 	var id int64 = -1
 	query := fmt.Sprintf("INSERT INTO `%s` (`name`) VALUES (?);", Tables[HouseIdx].Key)

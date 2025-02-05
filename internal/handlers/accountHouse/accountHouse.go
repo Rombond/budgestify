@@ -57,6 +57,14 @@ func CreateAccountForHouse(db *sql.DB) func(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No userID provided"})
 			return
 		}
+		if params.HouseID == 0 {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No houseID provided"})
+			return
+		}
+		if params.Name == "" {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No name provided"})
+			return
+		}
 
 		valid, err := token.IsTokenValid(ctx.GetHeader("Authorization"), params.UserId)
 		if err != nil {
@@ -65,28 +73,6 @@ func CreateAccountForHouse(db *sql.DB) func(ctx *gin.Context) {
 		}
 		if !valid {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"reason": "Authorization is not valid"})
-			return
-		}
-
-		if params.HouseID == 0 {
-			//Try to get house from user
-			houseIDs, err := db_sql.GetHouseIDFromUser(db, params.UserId)
-			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
-				return
-			}
-			if len(houseIDs) == 1 {
-				params.HouseID = houseIDs[0]
-			} else {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "Can't create an account, multiple houseIDs found"})
-				return
-			}
-			if params.HouseID == 0 {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "Can't create an account, no houseID found"})
-				return
-			}
-		} else if params.Name == "" {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "Need 'name' to create an account"})
 			return
 		}
 

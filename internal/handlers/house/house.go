@@ -44,6 +44,40 @@ func GetHouse(db *sql.DB) func(ctx *gin.Context) {
 	}
 }
 
+func GetHouses(db *sql.DB) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		var params house.HouseForm
+		err := ctx.ShouldBindJSON(&params)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+
+		if params.UserId == 0 {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": "No userID provided"})
+			return
+		}
+
+		valid, err := token.IsTokenValid(ctx.GetHeader("Authorization"), params.UserId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+		if !valid {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"reason": "Authorization is not valid"})
+			return
+		}
+
+		houses, err := db_sql.GetHouses(db, params.UserId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, houses)
+	}
+}
+
 func CreateHouseForUser(db *sql.DB) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		var params house.HouseForm
