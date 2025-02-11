@@ -21,7 +21,8 @@ func InitRouter(db *sql.DB) {
 	api := router.Group("/api")
 	{
 		api.GET("/status", status.GetDBStatus(db))
-		api.GET("/setup", status.GetSetupStatus())
+		api.GET("/setup", status.GetSetupStatus(db))
+		api.GET("/setup/:id", status.GetSetupStatus(db))
 
 		api.POST("/login", userHandlers.LoginUser(db))
 

@@ -50,7 +50,7 @@ func CreateUser(db *sql.DB, name string, login string, hash []byte) (int, error)
 		id = -1
 		return int(id), err
 	}
-	UpdateStateSetup(db, login)
+	UpdateStateSetup(db, int(id))
 	return int(id), nil
 }
 

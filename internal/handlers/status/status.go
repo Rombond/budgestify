@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	db_sql "github.com/Rombond/budgestify/internal/sql"
 
@@ -32,8 +33,8 @@ func GetDBStatus(db *sql.DB) func(ctx *gin.Context) {
 		if pingErr != nil {
 			slog.Error(pingErr.Error())
 			state.Database = false
-			state.Setup = db_sql.GetSetupDone()
 		}
+		state.Setup = db_sql.GetSetupDone()
 
 		resp := &responseStatus{
 			Status: *state,
@@ -42,8 +43,13 @@ func GetDBStatus(db *sql.DB) func(ctx *gin.Context) {
 	}
 }
 
-func GetSetupStatus() func(ctx *gin.Context) {
+func GetSetupStatus(db *sql.DB) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
+		id, _ := strconv.Atoi(ctx.Param("id"))
+		if id > 0 {
+			db_sql.UpdateStateSetup(db, id)
+		}
+
 		resp := &responseSetup{
 			Setup: *db_sql.GetStateSetup(),
 		}

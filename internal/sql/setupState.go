@@ -20,10 +20,10 @@ func GetStateSetup() *StateSetup {
 }
 
 func GetSetupDone() bool {
-	return state.IsDbInitialized || state.IsUserCreated || state.IsHouseCreated || state.IsCategoryCreated
+	return state.IsDbInitialized && state.IsUserCreated && state.IsHouseCreated && state.IsCategoryCreated
 }
 
-func UpdateStateSetup(db *sql.DB, login string) {
+func UpdateStateSetup(db *sql.DB, userID int) {
 	if !state.IsDbInitialized {
 		state.IsDbInitialized = setDbInitialized(db)
 		if !state.IsDbInitialized {
@@ -36,12 +36,8 @@ func UpdateStateSetup(db *sql.DB, login string) {
 			return
 		}
 	}
-	if login == "" {
-		return
-	}
-	userID, err := GetUserID(db, login)
 	if !state.IsHouseCreated {
-		if userID == -1 || err != nil {
+		if userID == -1 {
 			return
 		}
 		state.IsHouseCreated = setHouseCreated(db, userID)
@@ -108,7 +104,7 @@ func setCategoryCreated(db *sql.DB, houseID int) bool {
 		isCreated = false
 	}
 	if isThereCategories {
-		query = fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s` WHERE user = %d;", Tables[CategoryIdx].Key, houseID)
+		query = fmt.Sprintf("SELECT (Count(*) > 0) FROM `%s` WHERE house = %d;", Tables[CategoryIdx].Key, houseID)
 		err = db.QueryRow(query).Scan(&isCreated)
 		if err != nil {
 			slog.Error("[setCategoryCreated] Error querying house's categories: " + err.Error())
