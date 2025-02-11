@@ -56,6 +56,16 @@ func ChangeAccountHouseAmount(db *sql.DB, accountHouseID int, newAmount int) (bo
 	return true, nil
 }
 
+func TransactionAccountHouse(db *sql.DB, accountHouseID int, amount int) (bool, error) {
+	query := fmt.Sprintf("UPDATE %s SET `amount` = `amount` + (?) WHERE id = ?", Tables[AccountHouseIdx].Key)
+	_, err := db.Exec(query, amount, accountHouseID)
+	if err != nil {
+		slog.Error("[ChangeAccountHouseAmount] Error while updating accountHouse amount: " + err.Error())
+		return false, err
+	}
+	return true, nil
+}
+
 func DeleteAccountHouse(db *sql.DB, accountHouseID int) (bool, error) {
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", Tables[AccountHouseIdx].Key)
 	_, err := db.Exec(query, accountHouseID)
