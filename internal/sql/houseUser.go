@@ -118,3 +118,23 @@ func IsUserAdmin(db *sql.DB, houseID int, userID int) (bool, error) {
 	}
 	return admin, nil
 }
+
+func SetTheoricalAmount(db *sql.DB, houseID int, userID int, amount int) (bool, error) {
+	query := fmt.Sprintf("UPDATE %s SET `theoricalAmount` = (?) WHERE house = ? AND user = ?", Tables[House_UserIdx].Key)
+	_, err := db.Exec(query, amount, houseID, userID)
+	if err != nil {
+		slog.Error("[SetTheoricalAmount] Error while updating theoricalAmount: " + err.Error())
+		return false, err
+	}
+	return true, nil
+}
+
+func AddTheoricalAmount(db *sql.DB, houseID int, userID int, amount int) (bool, error) {
+	query := fmt.Sprintf("UPDATE %s SET `theoricalAmount` = `theoricalAmount` + (?) WHERE house = ? AND user = ?", Tables[House_UserIdx].Key)
+	_, err := db.Exec(query, amount, houseID, userID)
+	if err != nil {
+		slog.Error("[AddTheoricalAmount] Error while updating theoricalAmount: " + err.Error())
+		return false, err
+	}
+	return true, nil
+}
