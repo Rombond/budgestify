@@ -16,24 +16,22 @@ type Pair struct {
 
 var Tables = []Pair{
 	{"User", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, login VARCHAR(255) NOT NULL, hash BINARY(64) NOT NULL"},
-	{"AccountHouse", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, amount int NOT NULL"},
 	{"House", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, account INT, FOREIGN KEY (account) REFERENCES AccountHouse(id)"},
 	{"Category", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, icons VARCHAR(255), parent INT, house INT, FOREIGN KEY (parent) REFERENCES Category(id), FOREIGN KEY (house) REFERENCES House(id)"},
-	{"House_User", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), house INT NOT NULL, user INT NOT NULL, admin BOOLEAN NOT NULL, theoricalAmount INT NOT NULL DEFAULT 0, FOREIGN KEY (house) REFERENCES House(id), FOREIGN KEY (user) REFERENCES User(id)"},
-	{"Account", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, amount int NOT NULL, house_user INT NOT NULL, FOREIGN KEY (house_user) REFERENCES House_User(id)"},
-	{"Transaction", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, amount int NOT NULL, payer INT NOT NULL, payer_account INT, house_account INT, category INT, FOREIGN KEY (payer) REFERENCES House_User(id), FOREIGN KEY (payer_account) REFERENCES Account(id), FOREIGN KEY (house_account) REFERENCES AccountHouse(id), FOREIGN KEY (category) REFERENCES Category(id)"},
-	{"Participant", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), house_user INT NOT NULL, transaction int NOT NULL,FOREIGN KEY (house_user) REFERENCES House_User(id), FOREIGN KEY (transaction) REFERENCES Transaction(id)"},
+	{"House_User", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), house INT NOT NULL, user INT NOT NULL, admin BOOLEAN NOT NULL, FOREIGN KEY (house) REFERENCES House(id), FOREIGN KEY (user) REFERENCES User(id)"},
+	{"Account", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, amount FLOAT NOT NULL, currency CHAR(3) NOT NULL, theoricalAmount FLOAT NOT NULL, house_user INT NOT NULL, FOREIGN KEY (house_user) REFERENCES House_User(id)"},
+	{"Transaction", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), name VARCHAR(255) NOT NULL, amount FLOAT NOT NULL, payer INT NOT NULL, payer_account INT, house_account INT, category INT, pay_date DATE NOT NULL, currency CHAR(3) NOT NULL, conversion_rate FLOAT NOT NULL DEFAULT 1, FOREIGN KEY (payer) REFERENCES House_User(id), FOREIGN KEY (payer_account) REFERENCES Account(id), FOREIGN KEY (house_account) REFERENCES AccountHouse(id), FOREIGN KEY (category) REFERENCES Category(id)"},
+	{"Participant", "id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), house_user INT NOT NULL, transaction INT NOT NULL, has_repay BOOLEAN NOT NULL, repay_date DATE, FOREIGN KEY (house_user) REFERENCES House_User(id), FOREIGN KEY (transaction) REFERENCES Transaction(id)"},
 }
 
 const (
-	UserIdx         = 0
-	AccountHouseIdx = 1
-	HouseIdx        = 2
-	CategoryIdx     = 3
-	House_UserIdx   = 4
-	AccountIdx      = 5
-	TransactionIdx  = 6
-	ParticipantIdx  = 7
+	UserIdx        = 0
+	HouseIdx       = 1
+	CategoryIdx    = 2
+	House_UserIdx  = 3
+	AccountIdx     = 4
+	TransactionIdx = 5
+	ParticipantIdx = 6
 )
 
 func ConnectDatabase() *sql.DB {
