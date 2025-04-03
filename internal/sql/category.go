@@ -24,7 +24,7 @@ func GetCategories(db *sql.DB, houseID int) ([]category.Category, error) {
 	query := fmt.Sprintf("SELECT * FROM `%s` WHERE house = ?;", Tables[CategoryIdx].Key)
 	rows, err := db.Query(query, houseID)
 	if err != nil {
-		slog.Error("[GetCategories] Error querying house id from user: " + err.Error())
+		slog.Error("[GetCategories] Error querying categories: " + err.Error())
 		return categories, err
 	}
 	for rows.Next() {
@@ -89,7 +89,7 @@ func ChangeCategory(db *sql.DB, id int, name string, icon string, parent int) (b
 		args = append(args, parent)
 	}
 
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = ?", Tables[UserIdx].Key, params)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = ?", Tables[CategoryIdx].Key, params)
 	_, err := db.Exec(query, args...)
 	if err != nil {
 		slog.Error("[ChangeCategory] Error while updating category: " + err.Error())
