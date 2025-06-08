@@ -103,7 +103,7 @@ func CreateTransaction(db *sql.DB, name string, category *int, amount float64, p
 
 func ChangeTransaction(db *sql.DB, id int, name string, category *int, amount float64, payer int, payerAccount *int, payDate time.Time, currency string, conversionRate float64) (bool, error) {
 	params := "`name` = ? "
-	args := []any{}
+	args := []any{name}
 
 	if category != nil {
 		params += "`category` = ? "
