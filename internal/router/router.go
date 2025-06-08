@@ -7,6 +7,7 @@ import (
 	accountHandlers "github.com/Rombond/budgestify/internal/handlers/account"
 	categoryHandlers "github.com/Rombond/budgestify/internal/handlers/category"
 	houseHandlers "github.com/Rombond/budgestify/internal/handlers/house"
+	recurrenceHandlers "github.com/Rombond/budgestify/internal/handlers/recurrence"
 	status "github.com/Rombond/budgestify/internal/handlers/status"
 	transactionHandlers "github.com/Rombond/budgestify/internal/handlers/transaction"
 	userHandlers "github.com/Rombond/budgestify/internal/handlers/user"
@@ -70,6 +71,15 @@ func InitRouter(db *sql.DB) {
 
 			transactionGroup.POST("/create", transactionHandlers.CreateTransaction(db))
 			transactionGroup.POST("/edit", transactionHandlers.UpdateTransaction(db))
+		}
+
+		recurrenceGroup := api.Group("/recurrences")
+		{
+			recurrenceGroup.GET("/one", recurrenceHandlers.GetRecurrence(db))
+			recurrenceGroup.GET("/all", recurrenceHandlers.GetRecurrencesByHouseUser(db))
+
+			recurrenceGroup.POST("/create", recurrenceHandlers.CreateRecurrence(db))
+			recurrenceGroup.POST("/edit", recurrenceHandlers.UpdateRecurrence(db))
 		}
 	}
 
