@@ -8,6 +8,7 @@ import (
 	categoryHandlers "github.com/Rombond/budgestify/internal/handlers/category"
 	houseHandlers "github.com/Rombond/budgestify/internal/handlers/house"
 	status "github.com/Rombond/budgestify/internal/handlers/status"
+	transactionHandlers "github.com/Rombond/budgestify/internal/handlers/transaction"
 	userHandlers "github.com/Rombond/budgestify/internal/handlers/user"
 
 	"github.com/gin-gonic/gin"
@@ -60,6 +61,15 @@ func InitRouter(db *sql.DB) {
 
 			accountGroup.POST("/create", accountHandlers.CreateAccount(db))
 			accountGroup.POST("/edit", accountHandlers.UpdateAccount(db))
+		}
+
+		transactionGroup := api.Group("/transactions")
+		{
+			transactionGroup.GET("/one", transactionHandlers.GetTransaction(db))
+			transactionGroup.GET("/all", transactionHandlers.GetTransactionsByHouseUser(db))
+
+			transactionGroup.POST("/create", transactionHandlers.CreateTransaction(db))
+			transactionGroup.POST("/edit", transactionHandlers.UpdateTransaction(db))
 		}
 	}
 
