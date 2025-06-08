@@ -35,7 +35,7 @@ func IsTokenValid(tokenHeader string, id int) (bool, error) {
 	claims := &jwt.RegisteredClaims{}
 
 	// Parse le token et les claims
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
 		return []byte(os.Getenv("API_KEY")), nil
 	})
 	if err != nil {

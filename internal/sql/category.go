@@ -38,9 +38,9 @@ func GetCategories(db *sql.DB, houseID int) ([]category.Category, error) {
 }
 
 func CreateCategory(db *sql.DB, name string, icon string, parent int, houseID int) (int, error) {
-	properties := "(`name`"
+	properties := "`name`"
 	placeholders := "?"
-	args := []interface{}{name}
+	args := []any{name}
 
 	if icon != "" {
 		properties += ", `icon`"
@@ -52,11 +52,11 @@ func CreateCategory(db *sql.DB, name string, icon string, parent int, houseID in
 		placeholders += ", ?"
 		args = append(args, parent)
 	}
-	properties += ", `house`)"
+	properties += ", `house`"
 	placeholders += ", ?"
 	args = append(args, houseID)
 
-	query := fmt.Sprintf("INSERT INTO `%s` %s VALUES (%s);", Tables[CategoryIdx].Key, properties, placeholders)
+	query := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES (%s);", Tables[CategoryIdx].Key, properties, placeholders)
 
 	results, err := db.Exec(query, args...)
 	if err != nil {
@@ -74,7 +74,7 @@ func CreateCategory(db *sql.DB, name string, icon string, parent int, houseID in
 
 func ChangeCategory(db *sql.DB, id int, name string, icon string, parent int) (bool, error) {
 	params := ""
-	args := []interface{}{id}
+	args := []any{}
 
 	if name != "" {
 		params += "`name` = ? "
@@ -88,7 +88,7 @@ func ChangeCategory(db *sql.DB, id int, name string, icon string, parent int) (b
 		params += "`parent` = ? "
 		args = append(args, parent)
 	}
-
+	args = append(args, id)
 	query := fmt.Sprintf("UPDATE %s SET %s WHERE id = ?", Tables[CategoryIdx].Key, params)
 	_, err := db.Exec(query, args...)
 	if err != nil {
