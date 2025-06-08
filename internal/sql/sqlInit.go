@@ -89,16 +89,16 @@ var Tables = []Pair{
 		FOREIGN KEY (payer_account) REFERENCES Account(id),
 		FOREIGN KEY (category) REFERENCES Category(id)
 	`},
-	{"Participant", `
-		id INT NOT NULL AUTO_INCREMENT, 
-		PRIMARY KEY(id), 
-		transaction INT NOT NULL, 
-		house_user INT NOT NULL, 
-		repay_date DATE, 
-		amount_left FLOAT NOT NULL, 
-		FOREIGN KEY (house_user) REFERENCES House_User(id), 
-		FOREIGN KEY (transaction) REFERENCES Transaction(id)
-	`},
+	// {"Participant", `
+	// 	id INT NOT NULL AUTO_INCREMENT,
+	// 	PRIMARY KEY(id),
+	// 	transaction INT NOT NULL,
+	// 	house_user INT NOT NULL,
+	// 	repay_date DATE,
+	// 	amount_left FLOAT NOT NULL,
+	// 	FOREIGN KEY (house_user) REFERENCES House_User(id),
+	// 	FOREIGN KEY (transaction) REFERENCES Transaction(id)
+	// `},
 }
 
 const (
@@ -109,7 +109,7 @@ const (
 	AccountIdx     = 4
 	TransactionIdx = 5
 	RecurrenceIdx  = 6
-	ParticipantIdx = 7
+	// ParticipantIdx = 7
 )
 
 func ConnectDatabase() *sql.DB {
