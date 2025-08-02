@@ -112,7 +112,7 @@ func CreateAccount(db *sql.DB) func(ctx *gin.Context) {
 			return
 		}
 
-		id, err := db_sql.CreateAccount(db, params.Name, params.House_User, params.Amount, params.Currency, params.TheoricalAmount)
+		id, err := db_sql.CreateAccount(db, params.Name, params.House_User, params.Amount, params.Currency, params.TheoreticalAmount)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return
@@ -151,7 +151,7 @@ func UpdateAccount(db *sql.DB) func(ctx *gin.Context) {
 			return
 		}
 
-		_, err = db_sql.ChangeAccount(db, params.Id, params.Name, params.Amount, params.TheoricalAmount)
+		_, err = db_sql.ChangeAccount(db, params.Id, params.Name, params.Amount, params.TheoreticalAmount)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"reason": err.Error()})
 			return

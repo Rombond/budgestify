@@ -11,7 +11,7 @@ import (
 func GetAccount(db *sql.DB, id int) (account.Account, error) {
 	var account account.Account
 	query := fmt.Sprintf("SELECT * FROM `%s` WHERE id = ?;", Tables[AccountIdx].Key)
-	err := db.QueryRow(query, id).Scan(&account.Id, &account.Name, &account.House_User, &account.Amount, &account.Currency, &account.TheoricalAmount)
+	err := db.QueryRow(query, id).Scan(&account.Id, &account.Name, &account.House_User, &account.Amount, &account.Currency, &account.TheoreticalAmount)
 	if err != nil {
 		slog.Error("[GetAccount] Error querying account: " + err.Error())
 	}
@@ -28,7 +28,7 @@ func GetAccounts(db *sql.DB, house_User int) ([]account.Account, error) {
 		return accounts, err
 	}
 	for rows.Next() {
-		rows.Scan(&account.Id, &account.Name, &account.House_User, &account.Amount, &account.Currency, &account.TheoricalAmount)
+		rows.Scan(&account.Id, &account.Name, &account.House_User, &account.Amount, &account.Currency, &account.TheoreticalAmount)
 		accounts = append(accounts, account)
 	}
 	if err = rows.Err(); err != nil {
@@ -37,10 +37,10 @@ func GetAccounts(db *sql.DB, house_User int) ([]account.Account, error) {
 	return accounts, err
 }
 
-func CreateAccount(db *sql.DB, name string, house_User int, amount float64, currency string, theoricalAmount float64) (int, error) {
-	query := fmt.Sprintf("INSERT INTO `%s` (`name`, `house_user`, `amount`, `currency`, `theoricalAmount`) VALUES (?, ?, ?, ?, ?);", Tables[AccountIdx].Key)
+func CreateAccount(db *sql.DB, name string, house_User int, amount float64, currency string, theoreticalAmount float64) (int, error) {
+	query := fmt.Sprintf("INSERT INTO `%s` (`name`, `house_user`, `amount`, `currency`, `theoreticalAmount`) VALUES (?, ?, ?, ?, ?);", Tables[AccountIdx].Key)
 
-	results, err := db.Exec(query, name, house_User, amount, currency, theoricalAmount)
+	results, err := db.Exec(query, name, house_User, amount, currency, theoreticalAmount)
 	if err != nil {
 		slog.Error("[CreateAccount] Error while inserting new account: " + err.Error())
 		return -1, err
@@ -54,9 +54,9 @@ func CreateAccount(db *sql.DB, name string, house_User int, amount float64, curr
 	return int(id), nil
 }
 
-func ChangeAccount(db *sql.DB, id int, name string, amount float64, theoricalAmount float64) (bool, error) {
-	query := fmt.Sprintf("UPDATE %s SET `name` = ?, `amount` = ?, `theoricalAmount` = ? WHERE id = ?", Tables[AccountIdx].Key)
-	_, err := db.Exec(query, name, amount, theoricalAmount, id)
+func ChangeAccount(db *sql.DB, id int, name string, amount float64, theoreticalAmount float64) (bool, error) {
+	query := fmt.Sprintf("UPDATE %s SET `name` = ?, `amount` = ?, `theoreticalAmount` = ? WHERE id = ?", Tables[AccountIdx].Key)
+	_, err := db.Exec(query, name, amount, theoreticalAmount, id)
 	if err != nil {
 		slog.Error("[ChangeAccount] Error while updating account: " + err.Error())
 		return false, err

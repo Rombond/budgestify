@@ -55,7 +55,7 @@ var Tables = []Pair{
 		house_user INT NOT NULL, 
 		amount FLOAT NOT NULL, 
 		currency CHAR(3) NOT NULL, 
-		theoricalAmount FLOAT, 
+		theoreticalAmount FLOAT, 
 		FOREIGN KEY (house_user) REFERENCES House_User(id)
 	`},
 	{"Transaction", `
@@ -89,16 +89,6 @@ var Tables = []Pair{
 		FOREIGN KEY (payer_account) REFERENCES Account(id),
 		FOREIGN KEY (category) REFERENCES Category(id)
 	`},
-	// {"Participant", `
-	// 	id INT NOT NULL AUTO_INCREMENT,
-	// 	PRIMARY KEY(id),
-	// 	transaction INT NOT NULL,
-	// 	house_user INT NOT NULL,
-	// 	repay_date DATE,
-	// 	amount_left FLOAT NOT NULL,
-	// 	FOREIGN KEY (house_user) REFERENCES House_User(id),
-	// 	FOREIGN KEY (transaction) REFERENCES Transaction(id)
-	// `},
 }
 
 const (
@@ -109,16 +99,15 @@ const (
 	AccountIdx     = 4
 	TransactionIdx = 5
 	RecurrenceIdx  = 6
-	// ParticipantIdx = 7
 )
 
-func ConnectDatabase() *sql.DB {
+func ConnectDatabase(dbName string) *sql.DB {
 	cfg := mysql.Config{
 		User:   "root",
 		Passwd: os.Getenv("DB_PASSWORD"),
 		Net:    "tcp",
 		Addr:   "mysql_db:" + os.Getenv("DB_PORT"),
-		DBName: os.Getenv("DB_NAME"),
+		DBName: dbName,
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
