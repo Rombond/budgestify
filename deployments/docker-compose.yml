@@ -3,6 +3,7 @@ version: "3.9"
 services:
   app:
     image: cosmtrek/air
+    container_name: budgestify_app_hotreload
     # working_dir value has to be the same of mapped volume
     working_dir: /project-package
     ports:
@@ -14,8 +15,8 @@ services:
 
   db:
     image: mysql:latest
-    container_name: mysql_db
-    expose:
+    container_name: budgestify_mysql_db
+    ports:
       - "${DB_PORT}"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -25,6 +26,7 @@ services:
   
   phpmyadmin:
     image: phpmyadmin
+    container_name: budgestify_phpmyadmin
     restart: always
     ports:
       - 7001:80
