@@ -74,3 +74,13 @@ This document describes the database schema for the budget management applicatio
 - **Recurrence.payer_account** REFERENCES **Account.id**: Account used for recurring payments.
 - **Recurrence.category** REFERENCES **Category.id**: Recurring transactions are categorized (optional).
 
+## Notes
+
+- The `theoreticalAmount` field in `Account` could benefit from a clearer definition in the documentation (e.g., projected vs. actual balance).
+
+## Recommendations
+
+### Database Design
+1. **Currency Validation**: Add a check constraint on `currency` fields to ensure valid ISO 4217 codes (e.g., `CHECK (currency IN ('USD', 'EUR', 'GBP', ...))`).
+2. **Amount Precision**: Consider using `DECIMAL(10,2)` instead of `FLOAT` for `amount`, `conversion_rate`, and `theoreticalAmount` to avoid floating-point precision issues in financial calculations.
+3. **Indexes**: Create indexes on frequently queried columns (e.g., `Transaction.pay_date`, `Category.house`) to improve performance.
