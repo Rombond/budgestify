@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"slices"
 )
 
 type StateSetup struct {
@@ -54,11 +55,13 @@ func UpdateStateSetup(db *sql.DB, userID int) {
 
 func setDbInitialized(db *sql.DB) bool {
 	isInitialized := true
+	actualTables := GetTables(db)
 	for _, pair := range Tables {
-		if IsTableMissing(db, pair.Key) {
-			isInitialized = false
-			break
+		if slices.Contains(actualTables, pair.Key) {
+			continue
 		}
+		isInitialized = false
+		break
 	}
 	return isInitialized
 }

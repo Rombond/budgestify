@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"slices"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -119,47 +120,49 @@ func ConnectDatabase(dbName string) *sql.DB {
 }
 
 func InitDatabase(db *sql.DB) {
+	actualTables := GetTables(db)
+	slog.Debug("[InitDatabase] Actual tables: " + fmt.Sprint(actualTables))
+
 	for _, pair := range Tables {
-		if IsTableMissing(db, pair.Key) {
-			createTable(db, pair.Key, pair.Value)
-			if pair.Key == Tables[AccountIdx].Key {
-				query := fmt.Sprintf("ALTER TABLE %s ADD CONSTRAINT account FOREIGN KEY (account) REFERENCES Account(id)", Tables[HouseIdx].Key)
-				_, err := db.Exec(query)
-				if err != nil {
-					slog.Error("[InitDatabase] Error altering" + Tables[HouseIdx].Key + " table, to add foreign key of Account: " + err.Error())
-					os.Exit(1)
-				}
-			}
+		if slices.Contains(actualTables, pair.Key) {
+			continue
+		}
+
+		createTable(db, pair.Key, pair.Value)
+		if pair.Key != Tables[AccountIdx].Key {
+			continue
+		}
+		query := fmt.Sprintf("ALTER TABLE %s ADD CONSTRAINT account FOREIGN KEY (account) REFERENCES Account(id)", Tables[HouseIdx].Key)
+		_, err := db.Exec(query)
+		if err != nil {
+			slog.Error("[InitDatabase] Error altering" + Tables[HouseIdx].Key + " table, to add foreign key of Account: " + err.Error())
+			os.Exit(1)
 		}
 	}
 }
 
-func IsTableMissing(db *sql.DB, wantedTable string) bool {
+func GetTables(db *sql.DB) []string {
 	var tableName string
-	isMissing := true
-	query := fmt.Sprintf("SHOW TABLES LIKE '%s'", wantedTable)
-	results, err := db.Query(query)
+	tables := []string{}
+	results, err := db.Query("SHOW TABLES")
 	if err != nil {
-		slog.Error("[IsTableMissing] Error querying tables: " + err.Error())
+		slog.Error("[GetTables] Error querying tables: " + err.Error())
 		os.Exit(1)
 	}
 	defer results.Close()
 	for results.Next() {
 		err = results.Scan(&tableName)
 		if err != nil {
-			slog.Error("[IsTableMissing] Error querying tables: " + err.Error())
+			slog.Error("[GetTables] Error querying tables: " + err.Error())
 			os.Exit(1)
 		}
-		if tableName == wantedTable {
-			isMissing = false
-			break
-		}
+		tables = append(tables, tableName)
 	}
 	if err = results.Err(); err != nil {
-		slog.Error("[IsTableMissing] Error on results: " + err.Error())
+		slog.Error("[GetTables] Error on results: " + err.Error())
 		os.Exit(1)
 	}
-	return isMissing
+	return tables
 }
 
 func createTable(db *sql.DB, tableName string, columns string) {
